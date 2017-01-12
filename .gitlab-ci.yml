@@ -6,7 +6,8 @@ variables:
 
 before_script:
   - go get -v github.com/golang/lint/golint
-  - mysql < db/seed.sql
+  - apt-get update && apt-get install mysql-client
+  - mysql -uroot -p$MYSQL_ROOT_PASSWORD -hmysql < db/seed.sql
 
 services:
   - mysql
