@@ -19,6 +19,7 @@ test:
     - ls
     - mkdir -p /go/src/github.com/nsheridan
     - ln -s $PWD /go/src/github.com/nsheridan/cashier
+    - go get -u all
     - go install -v ./cmd/cashier ./cmd/cashierd
     - go list ./... |grep -v vendor/ |xargs go test
     - gofmt -d $(find -type f -name '*.go' -not -path './vendor/*')
