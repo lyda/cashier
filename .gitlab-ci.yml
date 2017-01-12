@@ -1,12 +1,10 @@
-image: golang:1.7
+image: lyda/golang:1.7
 
 variables:
   MYSQL_ROOT_PASSWORD: "password"
   MYSQL_TEST: "true"
 
 before_script:
-  - go get -v github.com/golang/lint/golint
-  - apt-get update && apt-get install mysql-client
   - mysql -uroot -p$MYSQL_ROOT_PASSWORD -hmysql < db/seed.sql
 
 services:
