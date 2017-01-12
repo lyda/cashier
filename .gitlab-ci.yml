@@ -4,6 +4,9 @@ variables:
   MYSQL_ROOT_PASSWORD: "password"
   MYSQL_ALLOW_EMPTY_PASSWORD: "1"
   MYSQL_TEST: "true"
+  MYSQL_TEST_USER: "root"
+  MYSQL_TEST_PASS: "password"
+  MYSQL_TEST_HOST: "mysql"
 
 before_script:
   - cat /etc/hosts
