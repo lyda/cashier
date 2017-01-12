@@ -2,6 +2,7 @@ image: lyda/golang:1.7
 
 variables:
   MYSQL_ROOT_PASSWORD: "password"
+  MYSQL_ALLOW_EMPTY_PASSWORD: "1"
   MYSQL_TEST: "true"
 
 before_script:
