@@ -1,0 +1,21 @@
+image: golang:1.7
+
+variables:
+  MYSQL_ROOT_PASSWORD: "password"
+  MYSQL_TEST: "true"
+
+before_script:
+  - go get -v github.com/golang/lint/golint
+  - mysql < db/seed.sql
+
+services:
+  - mysql
+
+test:
+  type: test
+  script:
+    - go install -v ./cmd/cashier ./cmd/cashierd
+    - go list ./... |grep -v vendor/ |xargs go test
+    - gofmt -d $(find -type f -name '*.go' -not -path './vendor/*')
+    - go list ./... |grep -v vendor/ |xargs go vet
+    - go list ./... |grep -v vendor/ |xargs -L1 golint -set_exit_status
