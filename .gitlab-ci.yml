@@ -19,7 +19,7 @@ test:
     - mkdir -p /go/src/github.com/nsheridan
     - ln -s $PWD /go/src/github.com/nsheridan/cashier
     - cd /go/src/github.com/nsheridan/cashier
-    - go get cmd/cashier cmd/cashierd
+    - go get ./cmd/cashier ./cmd/cashierd
     - for i in 1 2 3; do mysql -u$MYSQL_TEST_USER -p$MYSQL_ROOT_PASSWORD -h$MYSQL_TEST_HOST < db/seed.sql && break || true; sleep 3; done
     - go list ./... |grep -v vendor/ |xargs go test
     - gofmt -d $(find -type f -name '*.go' -not -path './vendor/*')
