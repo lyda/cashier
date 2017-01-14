@@ -19,10 +19,10 @@ const (
 // Config is an implementation of `auth.Provider` for authenticating using a
 // Gitlab account.
 type Config struct {
-	config       *oauth2.Config
-	organisation string
-	whitelist    map[string]bool
-	allusers     bool
+	config    *oauth2.Config
+	group     string
+	whitelist map[string]bool
+	allusers  bool
 }
 
 // New creates a new Github provider from a configuration.
@@ -35,8 +35,8 @@ func New(c *config.Auth) (auth.Provider, error) {
 	if c.ProviderOpts["allusers"] == "true" {
 		allUsers = true
 	}
-	if !allUsers && c.ProviderOpts["organisation"] == "" && len(uw) == 0 {
-		return nil, errors.New("gitlab_opts organisation and the users whitelist must not be both empty if allusers isn't true")
+	if !allUsers && c.ProviderOpts["group"] == "" && len(uw) == 0 {
+		return nil, errors.New("gitlab_opts group and the users whitelist must not be both empty if allusers isn't true")
 	}
 	if c.ProviderOpts["authurl"] == "" || c.ProviderOpts["tokenurl"] == "" {
 		return nil, errors.New("gitlab_opts authurl and tokenurl must be set")
@@ -54,9 +54,9 @@ func New(c *config.Auth) (auth.Provider, error) {
 				"api",
 			},
 		},
-		organisation: c.ProviderOpts["organisation"],
-		whitelist:    uw,
-		allusers:     allUsers,
+		group:     c.ProviderOpts["group"],
+		whitelist: uw,
+		allusers:  allUsers,
 	}, nil
 }
 
@@ -81,8 +81,8 @@ func (c *Config) Valid(token *oauth2.Token) bool {
 	if !token.Valid() {
 		return false
 	}
-	if c.organisation == "" {
-		// There's no organisation and token is valid.  Can only reach
+	if c.group == "" {
+		// There's no group and token is valid.  Can only reach
 		// here if user whitelist is set and user is in whitelist.
 		return true
 	}
@@ -92,7 +92,7 @@ func (c *Config) Valid(token *oauth2.Token) bool {
 		return false
 	}
 	for _, g := range groups {
-		if g.Name == c.organisation {
+		if g.Name == c.group {
 			return true
 		}
 	}
