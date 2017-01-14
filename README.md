@@ -184,7 +184,7 @@ server {
 ```
 
 ## auth
-- `provider` : string. Name of the oauth provider. Valid providers are currently "google" and "github".
+- `provider` : string. Name of the oauth provider. Valid providers are currently "google", "github" and "gitlab".
 - `oauth_client_id` : string. Oauth Client ID. This can be a secret stored in a [vault](https://www.vaultproject.io/) using the form `/vault/path/key` e.g. `/vault/secret/cashier/oauth_client_id`.
 - `oauth_client_secret` : string. Oauth secret. This can be a secret stored in a [vault](https://www.vaultproject.io/) using the form `/vault/path/key` e.g. `/vault/secret/cashier/oauth_client_secret`.
 - `oauth_callback_url` : string. URL that the Oauth provider will redirect to after user authorisation. The path is hardcoded to `"/auth/callback"` in the source.
@@ -214,6 +214,10 @@ Supported options:
 |---------:|-------------:|----------------------------------------------------------------------------------------------------------------------------------------|
 | Google   |       domain | If this is unset then you must whitelist individual email addresses using `users_whitelist`.                                           |
 | Github   | organization | If this is unset then you must whitelist individual users using `users_whitelist`. The oauth client and secrets should be issued by the specified organization. |
+| Gitlab   | authurl | Required.  The auth url: `https://GITLAB_HOST/oauth/authorize` |
+| Gitlab   | tokenurl | Required.  The token url: `https://GITLAB_HOST/oauth/token` |
+| Gitlab   | allusers | Allow all valid users to get signed keys. |
+| Gitlab   | group | If `allusers` and this are unset then you must whitelist individual users using `users_whitelist`. Otherwise the user must be a member of this group. |
 
 ## ssh
 - `signing_key`: string. Path to the signing ssh private key you created earlier. See the [note](#a-note-on-files) on files above.
