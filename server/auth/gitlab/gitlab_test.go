@@ -51,7 +51,7 @@ func TestNewEmptyGroupList(t *testing.T) {
 func TestStartSession(t *testing.T) {
 	a := assert.New(t)
 
-	p, _ := newGithub()
+	p, _ := newGitlab()
 	s := p.StartSession("test_state")
 	a.Contains(s.AuthURL, "exampleorg/oauth/authorize")
 	a.Contains(s.AuthURL, "state=test_state")
