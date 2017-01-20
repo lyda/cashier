@@ -27,14 +27,16 @@ type Config struct {
 	whitelist map[string]bool
 }
 
+var _ auth.Provider = (*Config)(nil)
+
 // New creates a new Google provider from a configuration.
-func New(c *config.Auth) (auth.Provider, error) {
+func New(c *config.Auth) (*Config, error) {
 	uw := make(map[string]bool)
 	for _, u := range c.UsersWhitelist {
 		uw[u] = true
 	}
 	if c.ProviderOpts["domain"] == "" && len(uw) == 0 {
-		return nil, errors.New("google_opts domain and the users whitelist must not be both empty")
+		return nil, errors.New("either Google Apps domain or users whitelist must be specified")
 	}
 
 	return &Config{

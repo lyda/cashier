@@ -25,14 +25,16 @@ type Config struct {
 	whitelist    map[string]bool
 }
 
+var _ auth.Provider = (*Config)(nil)
+
 // New creates a new Github provider from a configuration.
-func New(c *config.Auth) (auth.Provider, error) {
+func New(c *config.Auth) (*Config, error) {
 	uw := make(map[string]bool)
 	for _, u := range c.UsersWhitelist {
 		uw[u] = true
 	}
 	if c.ProviderOpts["organization"] == "" && len(uw) == 0 {
-		return nil, errors.New("github_opts organization and the users whitelist must not be both empty")
+		return nil, errors.New("either GitHub organization or users whitelist must be specified")
 	}
 	return &Config{
 		config: &oauth2.Config{
