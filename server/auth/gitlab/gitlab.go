@@ -2,7 +2,6 @@ package gitlab
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -34,8 +33,6 @@ func New(c *config.Auth) (auth.Provider, error) {
 		uw[u] = true
 	}
 	allUsers := false
-	fmt.Printf("Config: c.ProviderOpts[\"allusers\"] == \"%s\"\n",
-		c.ProviderOpts["allusers"])
 	if c.ProviderOpts["allusers"] == "true" {
 		allUsers = true
 	}
@@ -86,15 +83,12 @@ func (c *Config) Name() string {
 
 // Valid validates the oauth token.
 func (c *Config) Valid(token *oauth2.Token) bool {
-	fmt.Printf("In func Valid(%+v)\n", token)
 	if !token.Valid() {
-		fmt.Printf("Token not valid.\n")
 		return false
 	}
 	if c.allusers {
 		return true
 	}
-	fmt.Printf("  allusers == false\n")
 	if len(c.whitelist) > 0 && !c.whitelist[c.Username(token)] {
 		return false
 	}
@@ -103,17 +97,14 @@ func (c *Config) Valid(token *oauth2.Token) bool {
 		// here if user whitelist is set and user is in whitelist.
 		return true
 	}
-	fmt.Printf("  group == ''\n")
 	client := gitlabapi.NewOAuthClient(nil, token.AccessToken)
 	client.SetBaseURL(c.baseurl)
-	fmt.Printf("  client == '%+v'\n", client)
 	groups, _, err := client.Groups.ListGroups(nil)
 	if err != nil {
 		return false
 	}
-	fmt.Printf("  groups == '%+v'\n", groups)
 	for _, g := range groups {
-		if g.Name == c.group {
+		if g.Path == c.group {
 			return true
 		}
 	}
@@ -150,15 +141,11 @@ func (c *Config) Exchange(code string) (*oauth2.Token, error) {
 
 // Username retrieves the username portion of the user's email address.
 func (c *Config) Username(token *oauth2.Token) string {
-	fmt.Printf("Username AccessToken = '%s'\n", token.AccessToken)
 	client := gitlabapi.NewOAuthClient(nil, token.AccessToken)
 	client.SetBaseURL(c.baseurl)
-	fmt.Printf("Username client = '%+v'\n", client)
 	u, _, err := client.Users.CurrentUser()
 	if err != nil {
-		fmt.Printf("Username err = '%+v'\n", err)
 		return ""
 	}
-	fmt.Printf("Username u = '%+v'\n", u)
 	return u.Username
 }
