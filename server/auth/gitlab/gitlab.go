@@ -2,6 +2,7 @@ package gitlab
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -20,6 +21,7 @@ const (
 // Gitlab account.
 type Config struct {
 	config    *oauth2.Config
+	baseurl   string
 	group     string
 	whitelist map[string]bool
 	allusers  bool
@@ -32,14 +34,25 @@ func New(c *config.Auth) (auth.Provider, error) {
 		uw[u] = true
 	}
 	allUsers := false
+	fmt.Printf("Config: c.ProviderOpts[\"allusers\"] == \"%s\"\n",
+		c.ProviderOpts["allusers"])
 	if c.ProviderOpts["allusers"] == "true" {
 		allUsers = true
 	}
 	if !allUsers && c.ProviderOpts["group"] == "" && len(uw) == 0 {
 		return nil, errors.New("gitlab_opts group and the users whitelist must not be both empty if allusers isn't true")
 	}
-	if c.ProviderOpts["authurl"] == "" || c.ProviderOpts["tokenurl"] == "" {
-		return nil, errors.New("gitlab_opts authurl and tokenurl must be set")
+	authUrl := "https://gitlab.com/oauth/authorize"
+	if c.ProviderOpts["authurl"] != "" {
+		authUrl = c.ProviderOpts["authurl"]
+	}
+	tokenUrl := "https://gitlab.com/oauth/token"
+	if c.ProviderOpts["tokenurl"] != "" {
+		tokenUrl = c.ProviderOpts["tokenurl"]
+	}
+	baseUrl := "https://gitlab.com/api/v3/"
+	if c.ProviderOpts["baseurl"] != "" {
+		baseUrl = c.ProviderOpts["baseurl"]
 	}
 	return &Config{
 		config: &oauth2.Config{
@@ -47,8 +60,8 @@ func New(c *config.Auth) (auth.Provider, error) {
 			ClientSecret: c.OauthClientSecret,
 			RedirectURL:  c.OauthCallbackURL,
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  c.ProviderOpts["authurl"],
-				TokenURL: c.ProviderOpts["tokenurl"],
+				AuthURL:  authUrl,
+				TokenURL: tokenUrl,
 			},
 			Scopes: []string{
 				"api",
@@ -57,6 +70,7 @@ func New(c *config.Auth) (auth.Provider, error) {
 		group:     c.ProviderOpts["group"],
 		whitelist: uw,
 		allusers:  allUsers,
+		baseurl:   baseUrl,
 	}, nil
 }
 
@@ -72,13 +86,16 @@ func (c *Config) Name() string {
 
 // Valid validates the oauth token.
 func (c *Config) Valid(token *oauth2.Token) bool {
+	fmt.Printf("In func Valid(%+v)\n", token)
+	if !token.Valid() {
+		fmt.Printf("Token not valid.\n")
+		return false
+	}
 	if c.allusers {
 		return true
 	}
+	fmt.Printf("  allusers == false\n")
 	if len(c.whitelist) > 0 && !c.whitelist[c.Username(token)] {
-		return false
-	}
-	if !token.Valid() {
 		return false
 	}
 	if c.group == "" {
@@ -86,11 +103,15 @@ func (c *Config) Valid(token *oauth2.Token) bool {
 		// here if user whitelist is set and user is in whitelist.
 		return true
 	}
-	client := gitlabapi.NewClient(c.newClient(token), token.AccessToken)
+	fmt.Printf("  group == ''\n")
+	client := gitlabapi.NewOAuthClient(nil, token.AccessToken)
+	client.SetBaseURL(c.baseurl)
+	fmt.Printf("  client == '%+v'\n", client)
 	groups, _, err := client.Groups.ListGroups(nil)
 	if err != nil {
 		return false
 	}
+	fmt.Printf("  groups == '%+v'\n", groups)
 	for _, g := range groups {
 		if g.Name == c.group {
 			return true
@@ -129,10 +150,15 @@ func (c *Config) Exchange(code string) (*oauth2.Token, error) {
 
 // Username retrieves the username portion of the user's email address.
 func (c *Config) Username(token *oauth2.Token) string {
-	client := gitlabapi.NewClient(c.newClient(token), token.AccessToken)
+	fmt.Printf("Username AccessToken = '%s'\n", token.AccessToken)
+	client := gitlabapi.NewOAuthClient(nil, token.AccessToken)
+	client.SetBaseURL(c.baseurl)
+	fmt.Printf("Username client = '%+v'\n", client)
 	u, _, err := client.Users.CurrentUser()
 	if err != nil {
+		fmt.Printf("Username err = '%+v'\n", err)
 		return ""
 	}
+	fmt.Printf("Username u = '%+v'\n", u)
 	return u.Username
 }

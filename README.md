@@ -216,8 +216,9 @@ Supported options:
 |---------:|-------------:|----------------------------------------------------------------------------------------------------------------------------------------|
 | Google   |       domain | If this is unset then you must whitelist individual email addresses using `users_whitelist`.                                           |
 | Github   | organization | If this is unset then you must whitelist individual users using `users_whitelist`. The oauth client and secrets should be issued by the specified organization. |
-| Gitlab   | authurl | Required.  The auth url: `https://GITLAB_HOST/oauth/authorize` |
-| Gitlab   | tokenurl | Required.  The token url: `https://GITLAB_HOST/oauth/token` |
+| Gitlab   | baseurl | Optional. API url. Default: `https://gitlab.com/api/v3/` |
+| Gitlab   | authurl | Optional. Auth url. Default: `https://gitlab.com/oauth/authorize` |
+| Gitlab   | tokenurl | Optional. Token url. Default: `https://gitlab.com/oauth/token` |
 | Gitlab   | allusers | Allow all valid users to get signed keys. |
 | Gitlab   | group | If `allusers` and this are unset then you must whitelist individual users using `users_whitelist`. Otherwise the user must be a member of this group. |
 
