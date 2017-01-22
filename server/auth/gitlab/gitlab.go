@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/nsheridan/cashier/server/auth"
 	"github.com/nsheridan/cashier/server/config"
@@ -22,8 +23,17 @@ type Config struct {
 	config    *oauth2.Config
 	baseurl   string
 	group     string
+	level     int
 	whitelist map[string]bool
 	allusers  bool
+}
+
+var levelMap = map[string]int{
+	"guest":     10,
+	"reporter":  20,
+	"developer": 30,
+	"master":    40,
+	"owner":     50,
 }
 
 // New creates a new Gitlab provider from a configuration.
@@ -46,6 +56,16 @@ func New(c *config.Auth) (auth.Provider, error) {
 			return nil, errors.New("gitlab_opts siteurl must end in /")
 		}
 	}
+	levelOpt := 0
+	if c.ProviderOpts["level"] != "" {
+		levelOpt = levelMap[c.ProviderOpts["level"]]
+		if levelOpt == 0 {
+			var err error
+			if levelOpt, err = strconv.Atoi(c.ProviderOpts["level"]); err != nil {
+				return nil, errors.New("gitlab_opts level unrecognised; must be number or text level")
+			}
+		}
+	}
 	return &Config{
 		config: &oauth2.Config{
 			ClientID:     c.OauthClientID,
@@ -60,6 +80,7 @@ func New(c *config.Auth) (auth.Provider, error) {
 			},
 		},
 		group:     c.ProviderOpts["group"],
+		level:     levelOpt,
 		whitelist: uw,
 		allusers:  allUsers,
 		baseurl:   siteUrl + "api/v3/",
@@ -94,7 +115,8 @@ func (c *Config) Valid(token *oauth2.Token) bool {
 	}
 	client := gitlabapi.NewOAuthClient(nil, token.AccessToken)
 	client.SetBaseURL(c.baseurl)
-	groups, _, err := client.Groups.ListGroups(nil)
+	groups, response, err := client.Groups.SearchGroup(c.group)
+	fmt.Printf("response: %+v\n", response)
 	if err != nil {
 		return false
 	}
