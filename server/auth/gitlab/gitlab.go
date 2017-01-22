@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/nsheridan/cashier/server/auth"
 	"github.com/nsheridan/cashier/server/config"
