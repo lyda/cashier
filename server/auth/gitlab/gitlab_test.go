@@ -13,8 +13,7 @@ var (
 	oauthClientID     = "id"
 	oauthClientSecret = "secret"
 	oauthCallbackURL  = "url"
-	authurl           = "https://exampleorg/oauth/authorize"
-	tokenurl          = "https://exampleorg/oauth/token"
+	siteurl           = "https://exampleorg/"
 	group             = "exampleorg"
 )
 
@@ -28,14 +27,14 @@ func TestNew(t *testing.T) {
 	a.Equal(g.config.RedirectURL, oauthCallbackURL)
 }
 
-func TestNewEmptyAuthURL(t *testing.T) {
-	authurl = ""
+func TestNewBrokenSiteURL(t *testing.T) {
+	authurl = "https://exampleorg"
 	a := assert.New(t)
 
 	_, err := newGitlab()
-	a.EqualError(err, "gitlab_opts authurl and tokenurl must be set")
+	a.EqualError(err, "gitlab_opts siteurl must end in /")
 
-	authurl = "https://exampleorg/oauth/authorize"
+	authurl = "https://exampleorg/"
 }
 
 func TestNewEmptyGroupList(t *testing.T) {
@@ -64,9 +63,8 @@ func newGitlab() (auth.Provider, error) {
 		OauthClientSecret: oauthClientSecret,
 		OauthCallbackURL:  oauthCallbackURL,
 		ProviderOpts: map[string]string{
-			"group":    group,
-			"authurl":  authurl,
-			"tokenurl": tokenurl,
+			"group":   group,
+			"siteurl": siteurl,
 		},
 	}
 	return New(c)
