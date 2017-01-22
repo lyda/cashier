@@ -27,7 +27,7 @@ type Config struct {
 	allusers  bool
 }
 
-// New creates a new Github provider from a configuration.
+// New creates a new Gitlab provider from a configuration.
 func New(c *config.Auth) (auth.Provider, error) {
 	uw := make(map[string]bool)
 	for _, u := range c.UsersWhitelist {
@@ -108,14 +108,14 @@ func (c *Config) Valid(token *oauth2.Token) bool {
 	return false
 }
 
-// Revoke is a no-op revoke method. GitHub doesn't seem to allow token
-// revocation - tokens are indefinite and there are no refresh options etc.
+// Revoke is a no-op revoke method. Gitlab doesn't allow token
+// revocation - tokens live for an hour.
 // Returns nil to satisfy the Provider interface.
 func (c *Config) Revoke(token *oauth2.Token) error {
 	return nil
 }
 
-// StartSession retrieves an authentication endpoint from Github.
+// StartSession retrieves an authentication endpoint from Gitlab.
 func (c *Config) StartSession(state string) *auth.Session {
 	return &auth.Session{
 		AuthURL: c.config.AuthCodeURL(state),
@@ -124,19 +124,10 @@ func (c *Config) StartSession(state string) *auth.Session {
 
 // Exchange authorizes the session and returns an access token.
 func (c *Config) Exchange(code string) (*oauth2.Token, error) {
-	t, err := c.config.Exchange(oauth2.NoContext, code)
-	if err != nil {
-		return nil, err
-	}
-	// Github tokens don't have an expiry. Set one so that the session expires
-	// after a period.
-	if t.Expiry.Unix() <= 0 {
-		t.Expiry = time.Now().Add(1 * time.Hour)
-	}
-	return t, nil
+	return c.config.Exchange(oauth2.NoContext, code)
 }
 
-// Username retrieves the username portion of the user's email address.
+// Username retrieves the username of the Gitlab user.
 func (c *Config) Username(token *oauth2.Token) string {
 	client := gitlabapi.NewOAuthClient(nil, token.AccessToken)
 	client.SetBaseURL(c.baseurl)
