@@ -2,6 +2,7 @@ package gitlab
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -39,17 +40,12 @@ func New(c *config.Auth) (auth.Provider, error) {
 	if !allUsers && c.ProviderOpts["group"] == "" && len(uw) == 0 {
 		return nil, errors.New("gitlab_opts group and the users whitelist must not be both empty if allusers isn't true")
 	}
-	authUrl := "https://gitlab.com/oauth/authorize"
-	if c.ProviderOpts["authurl"] != "" {
-		authUrl = c.ProviderOpts["authurl"]
-	}
-	tokenUrl := "https://gitlab.com/oauth/token"
-	if c.ProviderOpts["tokenurl"] != "" {
-		tokenUrl = c.ProviderOpts["tokenurl"]
-	}
-	baseUrl := "https://gitlab.com/api/v3/"
-	if c.ProviderOpts["baseurl"] != "" {
-		baseUrl = c.ProviderOpts["baseurl"]
+	siteUrl := "https://gitlab.com/"
+	if c.ProviderOpts["siteurl"] != "" {
+		siteUrl = c.ProviderOpts["siteurl"]
+		if siteUrl[len(siteUrl)-1] != '/' {
+			return nil, errors.New("gitlab_opts siteurl must end in /")
+		}
 	}
 	return &Config{
 		config: &oauth2.Config{
@@ -57,8 +53,8 @@ func New(c *config.Auth) (auth.Provider, error) {
 			ClientSecret: c.OauthClientSecret,
 			RedirectURL:  c.OauthCallbackURL,
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  authUrl,
-				TokenURL: tokenUrl,
+				AuthURL:  siteUrl + "oauth/authorize",
+				TokenURL: siteUrl + "oauth/token",
 			},
 			Scopes: []string{
 				"api",
@@ -67,7 +63,7 @@ func New(c *config.Auth) (auth.Provider, error) {
 		group:     c.ProviderOpts["group"],
 		whitelist: uw,
 		allusers:  allUsers,
-		baseurl:   baseUrl,
+		baseurl:   siteUrl + "api/v3/",
 	}, nil
 }
 
@@ -104,6 +100,7 @@ func (c *Config) Valid(token *oauth2.Token) bool {
 		return false
 	}
 	for _, g := range groups {
+		fmt.Printf("group: %s = '%+v'\n", g.Path, g)
 		if g.Path == c.group {
 			return true
 		}
