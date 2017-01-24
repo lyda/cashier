@@ -25,8 +25,8 @@ var (
 	keysize     = pflag.Int("key_size", 2048, "Key size. Ignored for ed25519 keys")
 	validity    = pflag.Duration("validity", time.Hour*24, "Key validity")
 	keytype     = pflag.String("key_type", "rsa", "Type of private key to generate - rsa, ecdsa or ed25519")
-	public_key  = pflag.String("public_key", "", "Filename for public key")
-	public_cert = pflag.String("public_cert", "", "Filename for public cert")
+	public_key  = pflag.String("public_key", "", "Filename for public key (optional, no default)")
+	public_cert = pflag.String("public_cert", "", "Filename for public cert (optional, no default)")
 )
 
 func main() {
