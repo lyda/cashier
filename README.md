@@ -264,6 +264,20 @@ Copy the access token. In the terminal where you ran the `cashier` cli paste the
 The client will then generate a new ssh key-pair and send the public part to the server (along with the access token).
 Once signed the client will install the key and signed certificate in your ssh agent. When the certificate expires it will be removed automatically from the agent.
 
+If you set `public_key` and `public_cert` then the public key and
+cert will be written to the files specified. Generally the filenames should
+end in `.pub`.
+
+In your `ssh_config` you can load these for a given host with the
+`IdentityFile` and `CertificateFile`. However prior to OpenSSH
+version 7.2p1 the latter option didn't exist. In that case you could
+specify `~/.ssh/some-identity` as your `IdentityFile` and OpenSSH
+would look in `~/.ssh/some-identity.pub` and
+`~/.ssh/some-identity-cert.pub`.
+
+Starting with 7.2p1 the two options in the `ssh_config` can be the
+same as their matching options in the `cashier` config.
+
 ## Configuring SSH
 The ssh client needs no special configuration, just a running `ssh-agent`.
 The ssh server needs to trust the public part of the CA signing key. Add something like the following to your `sshd_config`:
