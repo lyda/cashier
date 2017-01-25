@@ -63,9 +63,8 @@ func main() {
 	if err := client.InstallCert(a, cert, priv); err != nil {
 		log.Fatalln(err)
 	}
-	ioutil.WriteFile(client.ExpandTilde(c.PublicKey),
-		ssh.MarshalAuthorizedKey(pub), 0644)
-	ioutil.WriteFile(client.ExpandTilde(c.PublicCert),
-		[]byte(cert.Type()+" "+base64.StdEncoding.EncodeToString(cert.Marshal())), 0644)
+	if err := client.InstallPublicFilis(c, cert, pub); err != nil {
+		log.Fatalln(err)
+	}
 	fmt.Println("Credentials added.")
 }

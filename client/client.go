@@ -16,6 +16,14 @@ import (
 	"golang.org/x/crypto/ssh/agent"
 )
 
+// InstallPublicFiles installs the public part of the cert and key.
+func InstallPublicFiles(c Config, cert *ssh.Certificate, pub PublicKey) error {
+	ioutil.WriteFile(client.ExpandTilde(c.PublicKey),
+		ssh.MarshalAuthorizedKey(pub), 0644)
+	ioutil.WriteFile(client.ExpandTilde(c.PublicCert),
+		[]byte(cert.Type()+" "+base64.StdEncoding.EncodeToString(cert.Marshal())), 0644)
+}
+
 // InstallCert adds the private key and signed certificate to the ssh agent.
 func InstallCert(a agent.Agent, cert *ssh.Certificate, key Key) error {
 	t := time.Unix(int64(cert.ValidBefore), 0)
