@@ -28,7 +28,7 @@ func setDefaults() {
 	viper.SetDefault("validateTLSCertificate", true)
 }
 
-// Expand ~ and ~user for a given path.
+// ExpandTilde expands ~ and ~user for a given path.
 func ExpandTilde(path string) string {
 	re := regexp.MustCompile("^~([^/]*)(/.*)")
 	if m := re.FindStringSubmatch(path); len(m) > 0 {
