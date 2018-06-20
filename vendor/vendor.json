@@ -959,6 +959,12 @@
 			"revisionTime": "2018-06-20T17:47:24Z"
 		},
 		{
+			"checksumSHA1": "91mzAbqHQ6AAK65DzB4IkLOcvtk=",
+			"path": "golang.org/x/oauth2/microsoft",
+			"revision": "ef147856a6ddbb60760db74283d2424e98c87bff",
+			"revisionTime": "2018-06-20T17:47:24Z"
+		},
+		{
 			"checksumSHA1": "USMsFbKZrNd1b9oRFbjevPr6PmI=",
 			"path": "golang.org/x/sys/unix",
 			"revision": "ad87a3a340fa7f3bed189293fbfa7a9b7e021ae1",
