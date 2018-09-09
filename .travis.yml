@@ -3,18 +3,17 @@ services:
   - mysql
 
 env:
-  - MYSQL_TEST="true"
+  - SUITE=lint
+  - SUITE=test
 
 go:
-  - 1.11beta3
-  - 1.10.3
-  - 1.9.7
+  - 1.11.x
+  - 1.10.x
   - tip
 
 matrix:
   allow_failures:
     - go: tip
-    - go: 1.11beta3
   fast_finish: true
 
 before_install:
@@ -26,4 +25,7 @@ install:
 
 sudo: false
 script:
-  - make test
+  - MYSQL_TEST="true" make $SUITE
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
